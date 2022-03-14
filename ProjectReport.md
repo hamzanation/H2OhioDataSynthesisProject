@@ -9,6 +9,8 @@
 
 ### Why Data Warehousing?
 
+![Data Warehousing Visual Overview](https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.ibm.com%2Fcloud%2Flearn%2Fdata-warehouse&psig=AOvVaw0cTHmOG4bWmLTqrw4O7xJX&ust=1647355025702000&source=images&cd=vfe&ved=0CAgQjRxqFwoTCPD8qu7pxfYCFQAAAAAdAAAAABAD)
+
 <p>The goal of data awrehoising is to create a trove of historical data that can be retrieved and analyzed to provide useful insigght into the organization's operations, as defined by <a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwiywoWJ5sX2AhUSXc0KHSf3AvwQFnoECBcQAw&url=https%3A%2F%2Fwww.investopedia.com%2Fterms%2Fd%2Fdata-warehousing.asp&usg=AOvVaw1JL6iQpJVmWHOaWHNjeSmy">investopedia</a>. Many organizations in enterprise use Data Warehousing for their business intelligence needs, such as JP Morgan Chase and Nationwide Insurance, and their are many benefits to choosing a Data Warehouse architecture, including but not limited to the following:</p>
 
 - Relational databases within data warehouses create meaningful information by joining the tables within appropriately
