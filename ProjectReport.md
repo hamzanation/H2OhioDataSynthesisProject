@@ -50,5 +50,30 @@
 
 <p>To be continued...</p>
 
+#### Data Attributes
+
+<p>This needs to be updated as we haven't fully figured things out yet.</p>
+
+##### Measurements and precision
+
+<p>Lots of the tabular data measurements are in the domain of real numbers, but the precision on the sensors and the cutoff for hydrogeologists taking hand samples was around the thousanths place. Thus tables relating to measurements such as chemistry are designed similar to the following table on water chemistry data:<p>
 
 
+```
+CREATE TABLE Chem_Water(
+	 sampleID VARCHAR(15) UNIQUE PRIMARY KEY
+	,internalSampleID VARCHAR(30) 
+	,dateAnalysis DATE 
+	,TN float(3) 
+	,TP float(3)
+	,disNH4 float(3)
+	,disNO3 float(3)
+	,disPO4 float(3)
+	
+	,foreign key(sampleID) references sampleinfo(sampleID)
+);
+```
+
+<p>Thus, precision measurements are assigned a `float(3)` value type and capped at the thousanths place.</p>
+
+<p>The cutoff has been chosen as the thousanths place due to discussion with the hydrogeologists, and the precision of the measurements that is used in their analysis.</p>
