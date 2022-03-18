@@ -74,6 +74,6 @@ CREATE TABLE Chem_Water(
 );
 ```
 
-<p>Thus, precision measurements are assigned a `float(3)` value type and capped at the thousanths place.</p>
+<p>Thus, precision measurements are assigned a ```float(3)``` value type and capped at the thousanths place.</p>
 
 <p>The cutoff has been chosen as the thousanths place due to discussion with the hydrogeologists, and the precision of the measurements that is used in their analysis.</p>
