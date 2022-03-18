@@ -48,7 +48,46 @@
 
 ### Deciding the Schema
 
-<p>To be continued...</p>
+<p>The entire database is still a work in progress, and there are some data products that haven't had attention towards their infrastructure yet, but it is likely that their infrastructure will be influeced by neighboring data products.</p>
+
+#### The Overall Layout of The Data Marts
+
+In designing the overall schema for a certain data mart, it would be appropiate to follow data warehousing principles and design it in the form of a <a href="https://en.wikipedia.org/wiki/Star_schema">STAR schema</a>. STAR schemas can be defined as schemas with tables representing measureable dimentions that are combined and aggregated into what is called a FACT table, in the case of sales for example, dimentions could be tables relating to employee and product information, and the FACT Table could aggregate over the product dimention to show sales. The schema designed for hand samples taken by hydrogeologists is shown in the figures below:
+
+<img src="/images/SensorsERD.png" alt="Entity Relationship Diagram for Sensors">
+
+The goal of this schema design was to abstract sensors from measurements, for example monitoring wells can measure multiple dimentions across the schema, but that doesn't couple those dimentions together, it simply has two separate relationships to the dimentions themselves instead of it actually being a part of the dimention. Essentially, the dimentions are abstracted from the sensors to provide flexibility. This schema was also designed for the FACT table to display as much sensor information as possible, it can be imagined as wide and denormalized table that would be rather sparse, as some dimentions are measured separately at fundamentally differenet locations and timestamps. Despite this increased width and sparsity, this FACT table can serve as the basis for many hydrogeological models created by clients to make inference on sensor data.
+
+<img src="/images/HandSamplesERD.png" alt="Entity Relationship Diagram for Hand Samples">
+
+The goal of the schema design was to be able to get as much information as possible from the sample info table, as queries will likey start with SampleInfo information and go into desired dimentions. 
+
+Here are some example queries and operations that can be performed in this schema that may be beneficial to poeple inquiring on the data available:
+
+````
+/* This query finds the locations of sensors that are outputting turbidity measures of rather inappropriate ranges. */
+SELECT LatLong
+FROM Turbidity AS T
+WHERE T.turbidity > FLAGGED_CUTOFF -- flagged value defined by domain experts
+````
+
+````
+/* This creates a view for looking at monitoring well measures from the FACT table*/
+CREATE VIEW Monitoring_Well_measures AS
+SELECT LatLong, Timestamp, Water_level, conductivity
+FROM FACT
+WHERE Sensor_Type = "Monitoring Well"
+````
+
+````
+/* This query gets the average Nytrogen and phospherous content in each wetland site from water measurements*/
+SELECT AVG(TN), AVG(TP)
+FROM SampleInfo AS si INNER JOIN  WATER as w 
+ON si.SampleID = w.SampleID
+GROUP BY mapID;
+````
+
+It should be noted that these queries are high level for the purpose of easy interpretation.
 
 #### Data Attributes
 
@@ -77,3 +116,13 @@ CREATE TABLE Chem_Water(
 Thus, precision measurements are assigned a `float(3)` value type and capped at the thousanths place.
 
 The cutoff has been chosen as the thousanths place due to discussion with the hydrogeologists, and the precision of the measurements that is used in their analysis.
+
+## Automation and Quality Assurance / Quality Control
+
+### Automatic Insertion
+
+Input here...
+
+### Automatic Quality Assurcance and Quality Control
+
+Input here...
