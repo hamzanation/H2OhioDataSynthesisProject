@@ -48,7 +48,9 @@
 
 ### Deciding the Schema
 
-<p>The entire database is still a work in progress, and there are some data products that haven't had attention towards their infrastructure yet, but it is likely that their infrastructure will be influeced by neighboring data products.</p>
+<p>The entire database is still a work in progress, and there are some data products that haven't had attention towards their infrastructure yet, but it is likely that their infrastructure will be influenced by neighboring data products.</p>
+
+**Note**: since we haven't really worked on everything, I'm not sure what to put here just yet, it will likely be just the stuff from ArcGIS and other databases
 
 #### The Overall Layout of The Data Marts
 
@@ -58,7 +60,7 @@ In designing the overall schema for a certain data mart, it would be appropiate 
 
 The goal of this schema design was to abstract sensors from measurements, for example monitoring wells can measure multiple dimentions across the schema, but that doesn't couple those dimentions together, it simply has two separate relationships to the dimentions themselves instead of it actually being a part of the dimention. Essentially, the dimentions are abstracted from the sensors to provide flexibility. This schema was also designed for the FACT table to display as much sensor information as possible, it can be imagined as wide and denormalized table that would be rather sparse, as some dimentions are measured separately at fundamentally differenet locations and timestamps. Despite this increased width and sparsity, this FACT table can serve as the basis for many hydrogeological models created by clients to make inference on sensor data.
 
-<img src="/images/HandSamplesERD.png" alt="Entity Relationship Diagram for Hand Samples">
+![Schema for HandSensors Table](./images/HandSampleSchema.png)
 
 The goal of the schema design was to be able to get as much information as possible from the sample info table, as queries will likey start with SampleInfo information and go into desired dimentions. 
 
@@ -92,6 +94,8 @@ It should be noted that these queries are high level for the purpose of easy int
 #### Data Attributes
 
 <p>This needs to be updated as we haven't fully figured things out yet.</p>
+
+**Note**: I should be getting an overall formal data dictionary of all the attributes used, so this should be updated appropriately when that is given.
 
 ##### Measurements and precision
 
@@ -128,6 +132,8 @@ Essentially, client interface with the database happens in two ways. For inserti
 ## Database Storage
 
 Given the projected size of multiple terrabytes (TB) over 10 years, the database has to be stored on a distributed system or a cloud in order to handle data of that scale appropriately. The decision for where to house the data resulted in the Ohio Supercomputer Center given the academic credits that could be used to cover most of the compute, as well as additional benefits that come from this project being backed by the Ohio Department of Natural Resources (ODNR). OSC will host the database on a PostgreSQL database server, and provide administrators with access to a virtual machine in order to interface with the database directly. There will also be different priveleges assigned to different users based on their level of interaction with the database, be it an administrative role or a user role.
+
+**Note**: Creating the database on OSC is still in its infancy stage, I can expand on this section once something is built on OSC.
 
 ## Automation and Quality Assurance / Quality Control
 
