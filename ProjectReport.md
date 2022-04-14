@@ -32,8 +32,7 @@
 
 <p>Most of the tabular data comes from either hand samples logged by a hydrogeologist who went out on the field, sensors placed in the wetland, or data from a GIS system used by the participating hydrogeologists. The first choice is simple and results in a direct upload after some quality assurance on the data, and the second choice of upload will come from another API called Ubidots as of 4/13/2022, but that may be subject to change and is beyond the scope of the current report. The third option resulted in an exploration of many GIS systems based on their potential integration into the database.</p>
 
-![Grass GIS Logo](https://grass.osgeo.org/images/logos/grassgis_logo_colorlogo_text_whitebg.png)
- ![ArcGIS logo](https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/ArcGIS_logo.png/640px-ArcGIS_logo.png)
+![Various GIS Logos](https://jakubnowosad.com/whyr_19/figs/gis-logos.png)
 
 <p> The final decision came down to Grass GIS vs ArcGIS due to ArcGIS's popularity and Grass GIS's easier integration with python via an API and connectors to relational databases. In the end, the hydrogeologists were simply much more familiar with ArcGIS, and data from ArcGIS applications can be pulled without much hassle. While Grass GIS was open source and had python integration, ArcGIS also has python integration, and OSU has the resources to use ArcGIS. Essentially, some of the data that will be or has been inserted into the database has been pulled from ArcGIS applications first.</p>
 
@@ -68,7 +67,7 @@ CREATE SCHEMA SampleMeas
         -- additional columns and metadata
         samp_id                     CHAR(6)    UNIQUE PRIMARY KEY,
         samp_long_id                CHAR(36)     UNIQUE,
-        ...)
+        --additional columns and metadata)
     CREATE TABLE FieldMeas( -- will have a default primary key as objID
         phys_collector                  VARCHAR(30),
         phys_proj_code                  CHAR(4),
