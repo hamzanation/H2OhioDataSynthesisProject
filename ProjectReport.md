@@ -58,6 +58,7 @@
 ### Deciding the Schema
 
 <p>The entire database is still a work in progress, and there are some data products that haven't had attention towards their infrastructure yet, but it is likely that their infrastructure will be influenced by neighboring data products. It is very likely that a schema will be designed for every datamart, that way tables in the datamart are grouped appropriately and can be referenced by schema name. An example of a schema in the database is as follows:</p>
+
 ````
 CREATE SCHEMA SampleMeas
     CREATE TABLE Samples( -- assumed FACT table, contains main sample information
@@ -75,6 +76,7 @@ CREATE SCHEMA SampleMeas
         -- additional columns and metadata)
     --additional tables;
 ````
+
 This would be considered the schema for the Sample Measurements datamart.
 
 #### The Overall Layout of The Data Marts
@@ -394,7 +396,7 @@ The command to edit crontab and add jobs
 $crontab -e
 ````
 
-In the crontab editor, the pulls can be done every hour like so (this example goes on the 0th minute of every hour every day every month and every day of the week)
+In the crontab editor, the pulls can be done every hour like so (this example goes on the 0th minute of every hour every day every month and every day of the week).
 ````
 0 * * * * /path/to/pull-and-insert.sh
 ````
