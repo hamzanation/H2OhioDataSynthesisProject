@@ -46,7 +46,7 @@
 
 #### Why Indpendent Data Marts?
 
-<img src="/images/IndependentDataMarts.png" alt="The Independent Data Marts Architecture">
+![The Independent Data Marts Architecture](./images/IndependentDataMarts.png)
 
 <p>Other than suiting the desired properties of the H2Ohio initiative, there are additional benefits to this architecture that would be suitable for the usage of and interface with the data.</p>
 
@@ -82,7 +82,7 @@ This would be considered the schema for the Sample Measurements datamart.
 
 In designing the overall schema for a certain data mart, it would be appropiate to follow data warehousing principles and design it in the form of a <a href="https://en.wikipedia.org/wiki/Star_schema">STAR schema</a>. STAR schemas can be defined as schemas with tables representing measureable dimentions that are combined and aggregated into what is called a FACT table, in the case of sales for example, dimentions could be tables relating to employee and product information, and the FACT Table could aggregate over the product dimention to show sales. The schema designed for hand samples taken by hydrogeologists is shown in the figures below:
 
-<img src="/images/SensorsERD.png" alt="Entity Relationship Diagram for Sensors">
+![Entity Relationship Diagram for Sensors](./images/SensorsERD.png)
 
 The goal of this schema design was to abstract sensors from measurements, for example monitoring wells can measure multiple dimentions across the schema, but that doesn't couple those dimentions together, it simply has two separate relationships to the dimentions themselves instead of it actually being a part of the dimention. Essentially, the dimentions are abstracted from the sensors to provide flexibility. This schema was also designed for the FACT table to display as much sensor information as possible, it can be imagined as wide and denormalized table that would be rather sparse, as some dimentions are measured separately at fundamentally differenet locations and timestamps. Despite this increased width and sparsity, this FACT table can serve as the basis for many hydrogeological models created by clients to make inference on sensor data.
 
@@ -435,4 +435,27 @@ Raw data comes in from ArcGIS and other sources, that data is uploaded onto Gith
 
 ## Conclusion and next steps
 
-Overall, the data infrastructure is not yet stable, and is constantly being revised by the clients as they debate the minutiae of their samples and the metadata of their samples. The version of the datamart that is on OSC is very much likely a couple versions behind their current iteration of sampling, as multiple changes to the ArcGIS collection tool and the standard methods of sampling have almost certainly occurred. This report should provide solid account for the design decisions made thus far, and may suffice as a description and slight manual for future administration who pick up immediately where this report leaves off. Skeletons and psuedocode are provided for all aspects of the workflow, which should be reasonable information for future administrators of the data infrastructure.
+Overall, the data infrastructure is not yet stable, and is constantly being revised by the clients as they debate the minutiae of their samples and the metadata of their samples. The version of the datamart that is on OSC is very much likely a couple versions behind their current iteration of sampling, as multiple changes to the ArcGIS collection tool and the standard methods of sampling have almost certainly occurred. This report should provide solid account for the design decisions made thus far, and may suffice as a description and slight manual for future administration who pick up immediately where this report leaves off. Skeletons and psuedocode are provided for all aspects of the workflow, which should be reasonable information for future administrators of the data infrastructure. Considering the volatility, the last thing I can leave future administrators with is a simple alter table statement for these anticipated modifications, if so that way the admins don't have to drop and reinsert every time:
+
+````
+ALTER TABLE samplemeas.fieldmeas
+ALTER COLUMN phys_utm_text TYPE VARCHAR(40);
+````
+
+````
+ALTER TABLE samplemeas.samples
+ADD sample_qr VARCHAR(256);
+````
+
+````
+ALTER TABLE samplemeas.samples
+RENAME COLUMN sample_id_pk TO sample_id;
+````
+
+````
+ALTER TABLE samplemeas.fieldmeas ALTER COLUMN satellites_in_use SET DEFAULT 3;
+````
+
+````
+ALTER TABLE samplemeas.fieldmeas DROP COLUMN phys_flag;
+````
