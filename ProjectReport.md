@@ -11,7 +11,7 @@
 
 ![A High Level Overview of Data Warehousing](./images/DataWarehouse.png)
 
-<p>The goal of data awrehoising is to create a trove of historical data that can be retrieved and analyzed to provide useful insigght into the organization's operations, as defined by <a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwiywoWJ5sX2AhUSXc0KHSf3AvwQFnoECBcQAw&url=https%3A%2F%2Fwww.investopedia.com%2Fterms%2Fd%2Fdata-warehousing.asp&usg=AOvVaw1JL6iQpJVmWHOaWHNjeSmy">investopedia</a>. Many organizations in enterprise use Data Warehousing for their business intelligence needs, such as JP Morgan Chase and Nationwide Insurance, and their are many benefits to choosing a Data Warehouse architecture, including but not limited to the following:</p>
+<p>The goal of data warehousing is to create a trove of historical data that can be retrieved and analyzed to provide useful insigght into the organization's operations, as defined by <a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwiywoWJ5sX2AhUSXc0KHSf3AvwQFnoECBcQAw&url=https%3A%2F%2Fwww.investopedia.com%2Fterms%2Fd%2Fdata-warehousing.asp&usg=AOvVaw1JL6iQpJVmWHOaWHNjeSmy">investopedia</a>. Many organizations in enterprise use Data Warehousing for their business intelligence needs, such as JP Morgan Chase and Nationwide Insurance, and their are many benefits to choosing a Data Warehouse architecture, including but not limited to the following:</p>
 
 - Relational databases within data warehouses create meaningful information by joining the tables within appropriately
 - Data warehouse structures can have certain data dimentions coupled or decoupled as needed, depending on the design choice
@@ -27,6 +27,15 @@
 - Hydrogeologists need to select data across various tables for desired analysis
 - Hydrogeologists need to project views of data that are more intuitive to read and make the process of analysis easier
 - Hydrogeologists need to update data records to fix any inadequacies and address warning flags
+
+### Where is the data coming from
+
+<p>Most of the tabular data comes from either hand samples logged by a hydrogeologist who went out on the field, sensors placed in the wetland, or data from a GIS system used by the participating hydrogeologists. The first choice is simple and results in a direct upload after some quality assurance on the data, and the second choice of upload will come from another API called Ubidots as of 4/13/2022, but that may be subject to change and is beyond the scope of the current report. The third option resulted in an exploration of many GIS systems based on their potential integration into the database.</p>
+
+![Grass GIS Logo](https://grass.osgeo.org/images/logos/grassgis_logo_colorlogo_text_whitebg.png)
+ ![ArcGIS logo](https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/ArcGIS_logo.png/640px-ArcGIS_logo.png)
+
+<p> The final decision came down to Grass GIS vs ArcGIS due to ArcGIS's popularity and Grass GIS's easier integration with python via an API and connectors to relational databases. In the end, the hydrogeologists were simply much more familiar with ArcGIS, and data from ArcGIS applications can be pulled without much hassle. While Grass GIS was open source and had python integration, ArcGIS also has python integration, and OSU has the resources to use ArcGIS. Essentially, some of the data that will be or has been inserted into the database has been pulled from ArcGIS applications first.</p>
 
 ## Designing The Infrastructure
 
@@ -48,9 +57,25 @@
 
 ### Deciding the Schema
 
-<p>The entire database is still a work in progress, and there are some data products that haven't had attention towards their infrastructure yet, but it is likely that their infrastructure will be influenced by neighboring data products.</p>
-
-**Note**: since we haven't really worked on everything, I'm not sure what to put here just yet, it will likely be just the stuff from ArcGIS and other databases
+<p>The entire database is still a work in progress, and there are some data products that haven't had attention towards their infrastructure yet, but it is likely that their infrastructure will be influenced by neighboring data products. It is very likely that a schema will be designed for every datamart, that way tables in the datamart are grouped appropriately and can be referenced by schema name. An example of a schema in the database is as follows:</p>
+````
+CREATE SCHEMA SampleMeas
+    CREATE TABLE Samples( -- assumed FACT table, contains main sample information
+        samp_collector              VARCHAR(30),
+        samp_proj_code              CHAR(4),
+        samp_event_id               CHAR(13),
+        -- additional columns and metadata
+        samp_id                     CHAR(6)    UNIQUE PRIMARY KEY,
+        samp_long_id                CHAR(36)     UNIQUE,
+        ...)
+    CREATE TABLE FieldMeas( -- will have a default primary key as objID
+        phys_collector                  VARCHAR(30),
+        phys_proj_code                  CHAR(4),
+        phys_event_id                   CHAR(13)
+        -- additional columns and metadata)
+    --additional tables;
+````
+This would be considered the schema for the Sample Measurements datamart.
 
 #### The Overall Layout of The Data Marts
 
@@ -93,10 +118,15 @@ It should be noted that these queries are high level for the purpose of easy int
 
 #### Data Attributes
 
-<p>This needs to be updated as we haven't fully figured things out yet.</p>
+<p>The data attributes of the data marts are actually changing consistently and on a weekly basis. Lots of the hydrogeologists involved discuss the standards of their sample documentation, and it often results in changing the metadata (data type -perhaps a larger cap on VARCHAR) or even adding and removing columns (likely to be remedied via an ALTER TABLE Statement)</p>
 
-**Note**: I should be getting an overall formal data dictionary of all the attributes used, so this should be updated appropriately when that is given.
+For a list of attributes and their types, here is the simplified schema for the database as of 4/13/2022 (not equivelent to the actual):
 
+![dbdesigner schema](./images/DbDesignerSchema.png)
+
+For every attribute currently in the database, the full schema can be devised from the dataabase:
+
+![full schema on database](images/fullschema.png)
 ##### Measurements and precision
 
 <p>Lots of the tabular data measurements are in the domain of real numbers, but the precision on the sensors and the cutoff for hydrogeologists taking hand samples was around the thousanths place. Thus tables relating to measurements such as chemistry are designed similar to the following table on water chemistry data:<p>
@@ -121,6 +151,8 @@ Thus, precision measurements are assigned a `float(3)` value type and capped at 
 
 The cutoff has been chosen as the thousanths place due to discussion with the hydrogeologists, and the precision of the measurements that is used in their analysis.
 
+GIS coordinates are assigned a precision of `float(6)` due to the location granularity desired. This does not carry over into the z dimention however, only x and y.
+
 ## Data Workflow
 
 There are a number of steps to be considered before data can be uploaded into the overall database. The raw data needed can come from a variety or sourcesl, it may come from a GIS system such as ArcGIS, or it may be recorded on spreadsheet on some client's local machine, or it could be in some cloud storage unit such as google drive. The data workflow of the project has been mapped into the following diagram:
@@ -133,8 +165,7 @@ Essentially, client interface with the database happens in two ways. For inserti
 
 Given the projected size of multiple terrabytes (TB) over 10 years, the database has to be stored on a distributed system or a cloud in order to handle data of that scale appropriately. The decision for where to house the data resulted in the Ohio Supercomputer Center given the academic credits that could be used to cover most of the compute, as well as additional benefits that come from this project being backed by the Ohio Department of Natural Resources (ODNR). OSC will host the database on a PostgreSQL database server, and provide administrators with access to a virtual machine in order to interface with the database directly. There will also be different priveleges assigned to different users based on their level of interaction with the database, be it an administrative role or a user role.
 
-**Note**: Creating the database on OSC is still in its infancy stage, I can expand on this section once something is built on OSC.
-
+The virtual machine is called `h2ohio-db` on the ohio supercomputer center, and a connection to the database `h2ohio` can be established via postgres using `sslmode=require` and credentials given by OSC.
 ## Automation and Quality Assurance / Quality Control
 
 After the schema has been defined, the wetland data needs to be formatted in a form appropriate for the schema  and inserted into the database. Data is often given as tables in excel spreadsheets and csv files, and those tables need to be inserted appropriately, with appropriate attributes in appropriate tables, and the insertions must be done in a way that maintains dependencies. Maintaining dependencies refers to foreign keys existing before tuple insertion, so for example, a table for chemical sample measurements may have a SampleID as a foreign key, and that SampleID needs to be inserted beforehand in the main "SampleInfo" table. Maintaining proper protocols for insertion as well as performing insertion automatically has been done via Github Actions automation, as well as a combination of Python and Shell scripts.
@@ -304,7 +335,7 @@ This method of flagging and creating error codes to avoid insertion is simple to
 
 After the QA/QC has been performed, insertion can be done using a python script or an R script as preferred. Most of the clients seem to have more experience in R than in Python, however insertions in Python are much safer because they are made atomic, meaning that if the program encounters an error some rows down the line, the rows before the error would not have been inserted, meaning the data could have it's issues resolved, and the program could be reran without fear of inserting duplicates.
 
-The python script for insertions is prepared as follows:
+The python script `insert.py` for insertions is prepared as follows:
 
 ````
 import psycopg2
@@ -354,3 +385,53 @@ def loadSampleInfo():
 ````
 
 For a more optimal insertion time, the data is converted to a `numpy.ndarray` before row iteration. Insertions are created in the form of insert querires to be executed by a cursor. The insertion is treated as a transaction of n insertion queries, n being the number of rows in the table being inserted into. This function is then modified for other tables, but a lot of formatting fixes, such as getting rid of `nan` values and proper date formatting are typically the same accross all tables, it is mainly the query text that changes.
+
+Due to the constraints of the VM not being able to insert into the database from a commit off of the VM, crontab will be used to have the VM pull the latest commit and insert into the database:
+
+The command to edit crontab and add jobs
+
+````
+$crontab -e
+````
+
+In the crontab editor, the pulls can be done every hour like so (this example goes on the 0th minute of every hour every day every month and every day of the week)
+````
+0 * * * * /path/to/pull-and-insert.sh
+````
+with `pull-and-insert.sh` as:
+````
+git pull
+for f in ./ready_to_insert/*
+do
+  python3 insert.py $f
+  ;perform QA checks similar to check_new_files.sh
+done
+````
+
+The VM should have git commands built into the terminal, so a git pull in the appropriate directory should work, if the operation is outside that directory, perform a `cd` towards that diretory. The directory ready_to_insert should be all files that have gone through QA/QC, but additional checks could be performed similar to `check_new_files.sh` if so inclined. `insert.py` could have built in conditions to perhaps look at the file name and determine the appropriate table.
+
+## Final result
+
+### Model architecture
+
+As of 4/12/2022, there is currently one datamart that is somewhat populated, and arguably two datamarts have been defined, based on the informal schema definition under the data attributes section (first one):
+
+![Current Architecture](./images/Current_state_arc.png)
+
+With the following simplified ERD (no attributes, as they have been explicitly listed in the data attributes section):
+
+![Simple ERD](./images/final_schema_simple.png)
+
+The projected architecture will likely stay consistent with the principle of independent data marts, but may also be subject to change:
+
+![Projected Architecture](./images/projected_arc.png)
+
+The final workflow can be graphed as follows:
+
+![final workflow diagram](./images/workflow.png)
+
+Raw data comes in from ArcGIS and other sources, that data is uploaded onto Github where the quality assurance is automated via github actions, and then the commits from github actions are pulled onto the VM and ready-to-insert preprocessed data files are inserted into the database at the Ohio Supercomputer Center.
+
+## Conclusion and next steps
+
+Overall, the data infrastructure is not yet stable, and is constantly being revised by the clients as they debate the minutiae of their samples and the metadata of their samples. The version of the datamart that is on OSC is very much likely a couple versions behind their current iteration of sampling, as multiple changes to the ArcGIS collection tool and the standard methods of sampling have almost certainly occurred. This report should provide solid account for the design decisions made thus far, and may suffice as a description and slight manual for future administration who pick up immediately where this report leaves off. Skeletons and psuedocode are provided for all aspects of the workflow, which should be reasonable information for future administrators of the data infrastructure.
